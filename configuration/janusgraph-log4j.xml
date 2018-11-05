@@ -18,6 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+  The following file from the  Ambari 2.6 branch titan service was used as a template:
+  https://github.com/apache/ambari/blob/branch-2.6/ambari-server/src/main/resources/common-services/TITAN/1.0.0/configuration/titan-log4j.xml
 -->
 
 <configuration supports_final="false">
@@ -35,8 +37,8 @@
       log4j.appender.A2.layout.ConversionPattern=%d{HH:mm:ss} %-5p %c %x - %m%n
       log4j.rootLogger=${gremlin.log4j.level}, A2
 
-      #log4j.logger.com.thinkaurelius.titan.graphdb.database.idassigner.placement=DEBUG
-      #log4j.logger.com.thinkaurelius.titan.diskstorage.hbase.HBaseStoreManager=DEBUG
+      #log4j.logger.org.janusgraph.graphdb.database.idassigner.placement=DEBUG
+      #log4j.logger.org.janusgraph.diskstorage.hbase.HBaseStoreManager=DEBUG
 
       # Disable spurious Hadoop config deprecation warnings under 2.2.0.
       #

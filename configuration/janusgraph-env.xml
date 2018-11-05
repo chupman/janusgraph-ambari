@@ -18,42 +18,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+  The following file from the Ambari 2.6 branch titan service was used as a template:
+  https://github.com/apache/ambari/blob/branch-2.6/ambari-server/src/main/resources/common-services/TITAN/1.0.0/configuration/titan-env.xml
 -->
 
 <configuration supports_final="false">
 
   <property>
-    <name>titan_user</name>
-    <display-name>Titan User</display-name>
-    <description>User to run Titan as</description>
+    <name>janusgraph_user</name>
+    <display-name>JanusGraph User</display-name>
+    <description>User to run JanusGraph as</description>
     <property-type>USER</property-type>
-    <value>titan</value>
+    <value>janusgraph</value>
     <on-ambari-upgrade add="false"/>
   </property>
 
   <property>
-    <name>titan_pid_dir</name>
-    <value>/var/run/titan</value>
+    <name>janusgraph_group</name>
+    <display-name>JanusGraph Group</display-name>
+    <description>Group for JanusGraph permissions</description>
+    <property-type>GROUP</property-type>
+    <value>janusgraph</value>
     <on-ambari-upgrade add="false"/>
   </property>
 
   <property>
-    <name>titan_log_dir</name>
-    <value>/var/log/titan</value>
+    <name>janusgraph_pid_dir</name>
+    <value>/var/run/janusgraph</value>
     <on-ambari-upgrade add="false"/>
   </property>
 
   <property>
-    <name>titan_server_port</name>
+    <name>janusgraph_log_dir</name>
+    <value>/var/log/janusgraph</value>
+    <on-ambari-upgrade add="false"/>
+  </property>
+
+  <property>
+    <name>janusgraph_server_port</name>
     <value>8182</value>
-    <description>Sets the port Titan Server binds to, default is 8182</description>
+    <description>Sets the port JanusGraph Server binds to, default is 8182</description>
     <on-ambari-upgrade add="false"/>
   </property>
 
   <property>
-    <name>titan_hdfs_home_dir</name>
-    <value>/apps/titan/data</value>
-    <description>A root location in HDFS for Titan to write collection data to. Rather than specifying an HDFS location for the data directory or update log directory, use this to specify one root location and have everything automatically created within this HDFS</description>
+    <name>janusgraph_hdfs_home_dir</name>
+    <value>/apps/janusgraph/data</value>
+    <description>A root location in HDFS for JanusGraph to write collection data to. Rather than specifying an HDFS location for the data directory or update log directory, use this to specify one root location and have everything automatically created within this HDFS</description>
     <on-ambari-upgrade add="false"/>
   </property>
   <property>
@@ -62,7 +73,7 @@
     <value-attributes>
       <type>boolean</type>
     </value-attributes>
-    <description>Set whether to enable SimpleAuthenticator(PLAIN SASL), the credentials database is located at /usr/iop/current/titan-client/data/credentials.kryo. Note: this option will not take effect if Knox is installed.</description>
+    <description>Set whether to enable SimpleAuthenticator(PLAIN SASL), the credentials database is located at /usr/iop/current/janusgraph-client/data/credentials.kryo. Note: this option will not take effect if Knox is installed.</description>
     <on-ambari-upgrade add="false"/>
   </property>
   <property>
@@ -105,8 +116,8 @@
   </property>
   <property>
     <name>content</name>
-    <display-name>titan-env template</display-name>
-    <description>This is the template for titan-env.sh file</description>
+    <display-name>janusgraph-env template</display-name>
+    <description>This is the template for janusgraph-env.sh file</description>
     <on-ambari-upgrade add="false"/>
     <value>
 # Set JAVA HOME
@@ -122,8 +133,8 @@ export YARN_HOME={{yarn_home_dir}}
 export YARN_CONF_DIR=$HADOOP_CONF_DIR
 export SPARK_HOME={{spark_home_dir}}
 export SPARK_CONF_DIR={{spark_config_dir}}
-export TITAN_HOME={{titan_home_dir}}
-export CLASSPATH=$CLASSPATH:$HADOOP_CONF_DIR:$SPARK_CONF_DIR:$TITAN_HOME/conf
+export JANUSGRAPH_HOME={{janusgraph_home_dir}}
+export CLASSPATH=$CLASSPATH:$HADOOP_CONF_DIR:$SPARK_CONF_DIR:$JANUSGRAPH_HOME/conf
 
 #add hbase configuration directory into classpath
 if ([ -d "{{hbase_config_dir}}" ]); then
@@ -131,7 +142,7 @@ if ([ -d "{{hbase_config_dir}}" ]); then
    export CLASSPATH=$CLASSPATH:$HBASE_CONF_DIR
 fi
 
-if ([[ ! -d "{{titan_ext_spark_plugin_dir}}" ]] &amp;&amp; [[ -d "$SPARK_HOME/jars" ]]); then
+if ([[ ! -d "{{janusgraph_ext_spark_plugin_dir}}" ]] &amp;&amp; [[ -d "$SPARK_HOME/jars" ]]); then
   for jar in $SPARK_HOME/jars/*.jar; do
     if ([[ $jar != */guava*.jar ]] &amp;&amp; [[ $jar != */slf4j-log4j12*.jar ]] &amp;&amp; [[ $jar != */spark-core*.jar ]]) ;then
       CLASSPATH=$CLASSPATH:$jar
@@ -145,13 +156,33 @@ export CLASSPATH
 export IOP_JAVA_OPTIONS="$JAVA_OPTIONS -D{{platform_name}}.version={{full_stack_version}} -Djava.library.path={{hadoop_lib_native_dir}}"
 
 {% if security_enabled -%}
-export JVMFLAGS="-Djava.security.auth.login.config={{titan_solr_client_jaas_file}}"
+export JVMFLAGS="-Djava.security.auth.login.config={{janusgraph_solr_client_jaas_file}}"
 export IOP_JAVA_OPTIONS="$IOP_JAVA_OPTIONS $JVMFLAGS"
 {% endif %}
 
 source "$HADOOP_CONF_DIR"/hadoop-env.sh
-export HADOOP_GREMLIN_LIBS=$TITAN_HOME/lib
-export TITAN_LOGDIR={{titan_log_dir}}
+export HADOOP_GREMLIN_LIBS=$JANUSGRAPH_HOME/lib
+export JANUSGRAPH_LOGDIR={{janusgraph_log_dir}}
     </value>
+  </property>
+  <property>
+    <name>janusgraph_download_url</name>
+    <value>https://github.com/JanusGraph/janusgraph/releases/download/v0.2.0/janusgraph-0.2.0-hadoop2.zip</value>
+    <description>JanusGraph download url. Currently defaults to version 0.2.0.</description>
+  </property>
+  <property>
+    <name>janusgraph_install_dir</name>
+    <value>/opt/janusgraph</value>
+    <description>JanusGraph download location.</description>
+  </property>
+  <property>
+    <name>janusgraph_server_csv_metrics</name>
+    <value>/tmp/gremlin-server-metrics.csv</value>
+    <description>File location for gremlin csv metrics.</description>
+  </property>
+  <property>
+    <name>storage_hbase_table</name>
+    <value>janusgraph_solr</value>
+    <description>Name for the hbase table JanusGraph will use.</description>
   </property>
 </configuration>
